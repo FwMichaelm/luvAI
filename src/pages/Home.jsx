@@ -32,7 +32,7 @@ export default function Home() {
           justifyContent: "center",
           alignItems: "center",
           gap: "2rem",
-          marginBottom: "4rem",
+          marginBottom: "2rem",
           width: "100%",
         }}
       >
@@ -68,6 +68,13 @@ export default function Home() {
         >
           👩 Female
         </button>
+      </div>
+
+      <div style={{ textAlign: "center", marginBottom: "1rem" }}>
+        <p style={{ color: "#9ca3af", fontSize: "1rem" }}>
+          Coded and Designed by <span style={{ color: "#f8fafc" }}>Michael Mafanire</span> &{" "}
+          <span style={{ color: "#f8fafc" }}>Vanessa Ly</span>
+        </p>
       </div>
     </motion.div>
   );

@@ -69,8 +69,7 @@ export default function HaircutSuggestions() {
         padding: "2rem",
         boxSizing: "border-box",
         fontFamily: "Inter, sans-serif",
-        maxWidth: "1440px",
-        margin: "0 auto"
+        overflow: "hidden" // prevents accidental scrolling
       }}
     >
       <motion.h1
@@ -99,8 +98,8 @@ export default function HaircutSuggestions() {
           borderRadius: "12px",
           boxShadow: "0 0 20px rgba(38, 99, 235, 0.4)",
           textAlign: "left",
-          maxWidth: "90vw",
-          width: "500px",
+          width: "100%",
+          maxWidth: "600px", // keeps it readable
           listStyleType: "disc"
         }}
       >
