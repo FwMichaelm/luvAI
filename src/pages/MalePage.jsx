@@ -36,49 +36,51 @@ export default function MalePage() {
         if (predictions.length > 0) {
           const keypoints = predictions[0].keypoints;
 
-          // more reliable landmarks
-          const top = keypoints[10];          // forehead
-          const chin = keypoints[152];        // chin
-          const leftCheek = keypoints[93];    // widest cheek (left)
-          const rightCheek = keypoints[323];  // widest cheek (right)
-          const leftJaw = keypoints[ jawIndex(0) ];   // near jaw corner left
-          const rightJaw = keypoints[ jawIndex(16) ]; // near jaw corner right
-          const leftTemple = keypoints[127];  // temple (left)
-          const rightTemple = keypoints[356]; // temple (right)
+          // multiple landmarks for averaging
+          const top = keypoints[10]; // forehead midpoint
+          const chin = keypoints[152]; // chin
+          const leftTemple = keypoints[127];
+          const rightTemple = keypoints[356];
+          const leftCheek = keypoints[234];
+          const rightCheek = keypoints[454];
+          const leftJaw = keypoints[172];
+          const rightJaw = keypoints[397];
 
-          // fallback helper (jawline points run 0–16)
-          function jawIndex(i) {
-            const base = 0; 
-            return base + i;
-          }
-
-          // measurements
+          // core measurements
           const faceHeight = Math.abs(top.y - chin.y);
+          const foreheadWidth = Math.abs(rightTemple.x - leftTemple.x);
           const cheekboneWidth = Math.abs(rightCheek.x - leftCheek.x);
           const jawWidth = Math.abs(rightJaw.x - leftJaw.x);
-          const foreheadWidth = Math.abs(rightTemple.x - leftTemple.x);
+          const faceWidth = Math.max(foreheadWidth, cheekboneWidth, jawWidth);
 
-          // normalize
-          const normCheek = cheekboneWidth / faceHeight;
-          const normJaw = jawWidth / faceHeight;
-          const normForehead = foreheadWidth / faceHeight;
-          const heightToWidthRatio = faceHeight / cheekboneWidth;
+          // ratios
+          const heightToWidth = faceHeight / faceWidth;
+          const cheekToJaw = cheekboneWidth / jawWidth;
+          const cheekToForehead = cheekboneWidth / foreheadWidth;
+          const foreheadToJaw = foreheadWidth / jawWidth;
+
+          console.log("Ratios =>", {
+            heightToWidth: heightToWidth.toFixed(2),
+            cheekToJaw: cheekToJaw.toFixed(2),
+            cheekToForehead: cheekToForehead.toFixed(2),
+            foreheadToJaw: foreheadToJaw.toFixed(2),
+          });
 
           let shape = "";
 
-          // refined classification rules
-          if (heightToWidthRatio > 1.65 && normJaw < normCheek * 0.85) {
-            shape = "Oblong";
-          } else if (Math.abs(normJaw - normCheek) < 0.08 && heightToWidthRatio < 1.35) {
-            shape = "Square";
-          } else if (normForehead > normCheek && normJaw < normForehead * 0.85) {
-            shape = "Heart";
-          } else if (normCheek > normForehead * 1.1 && normCheek > normJaw * 1.1) {
-            shape = "Diamond";
-          } else if (heightToWidthRatio <= 1.15 && Math.abs(normJaw - normCheek) < 0.15) {
-            shape = "Round";
+          // stricter classification rules
+          if (heightToWidth >= 1.5) {
+            shape = "Oblong"; // long and narrow
+          } else if (heightToWidth <= 1.3 && Math.abs(cheekToJaw - 1) <= 0.1) {
+            shape = "Round"; // short, soft jaw
+          } else if (Math.abs(cheekToJaw - 1) <= 0.1 && heightToWidth > 1.3) {
+            shape = "Square"; // strong jaw, balanced width
+          } else if (cheekToForehead > 1.05 && cheekToJaw > 1.05) {
+            shape = "Diamond"; // widest at cheeks
+          } else if (foreheadToJaw > 1.1 && heightToWidth > 1.3) {
+            shape = "Heart"; // forehead wide, chin narrow
           } else {
-            shape = "Oval";
+            shape = "Oval"; // default balanced
           }
 
           setFaceShape(shape);
